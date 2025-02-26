@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Numerics;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 namespace ConsoleAppTurnBased
 {
     class Enemy
@@ -22,7 +26,7 @@ namespace ConsoleAppTurnBased
         private int bleedturns;
         private int paraTurns;
 
-        
+
 
 
 
@@ -39,10 +43,11 @@ namespace ConsoleAppTurnBased
         public int a { get { return attackPower; } }
 
         public int t { get { return thrustUses; } }
-        public int mt { get { return maxthrustUses; } }
+        public int mt { get { return maxthrustUses; } 
+        }
 
 
-        public Enemy(int attackPower, int CurrentHealth, int MaxHealth, int Defense, int t_Defense, int maxstabUses, int stabUses, int bleedturns, int thrustUses, int maxthrustUses , int paraTurns, string User)
+        public Enemy(int attackPower, int CurrentHealth, int MaxHealth, int Defense, int t_Defense, int maxstabUses, int stabUses, int bleedturns, int thrustUses, int maxthrustUses, int paraTurns, string User)
         {
 
 
@@ -58,9 +63,9 @@ namespace ConsoleAppTurnBased
             this.maxthrustUses = maxthrustUses;
 
             this.bleedturns = bleedturns;
-            this.paraTurns = paraTurns; 
+            this.paraTurns = paraTurns;
 
-  
+
             this.stabUses = stabUses;
             this.maxstabUses = maxstabUses;
 
@@ -96,7 +101,7 @@ namespace ConsoleAppTurnBased
 
                     case 2:
                         Console.WriteLine($"{User} launched a focused strike and dealt {RandomDamage - player.d} damage!");
-                        unitthatsgetAttacking.TakeDamage(RandomDamage,enemy);
+                        unitthatsgetAttacking.TakeDamage(RandomDamage, enemy);
                         break;
 
                     case 3:
@@ -142,7 +147,7 @@ namespace ConsoleAppTurnBased
 
 
                 }
-Console.ResetColor();
+                Console.ResetColor();
 
             }
         }
@@ -245,7 +250,7 @@ Console.ResetColor();
             bleedturns = 0;
 
             int paraChance = random.Next(1, 4);
-            if (paraChance == 4 & paraTurns > 0 )
+            if (paraChance == 4 & paraTurns > 0)
             {
                 playerthrust.paralyzeCheck();
             }
@@ -294,10 +299,10 @@ Console.ResetColor();
                             stabnbleedenemy.takestab(randStabDamage);
                             stabnbleedenemy.ApplyBleed(attackPower / 2);
                             stabUses++;
-                        
+
                             break;
                     }
-                }  Console.ResetColor();
+                } Console.ResetColor();
 
             }
         }
@@ -313,7 +318,7 @@ Console.ResetColor();
 
 
 
-            }
+        }
 
 
         public void ApplyBleed(int bleeddamage)
@@ -390,15 +395,15 @@ Console.ResetColor();
                         break;
 
                     default:
-                            {
+                        {
                             Console.WriteLine($"Like lightning, {User} dashed to their opponent and thrust their in there weakpoint doing {randThrustDamage - paraThrust.d} ");
                             paraThrust.takeThrust(randThrustDamage);
                             paraThrust.applyParalyze();
                         }
                         break;
-                
+
                 }
-              Console.ResetColor();
+                Console.ResetColor();
             }
         }
 
@@ -411,7 +416,7 @@ Console.ResetColor();
                 Console.ResetColor();
                 paraTurns += 7;
             }
-           
+
         }
 
         public void paralyzeCheck()
@@ -433,6 +438,17 @@ Console.ResetColor();
             }
 
         }
-}
+        public void deathCheck(Enemy enemy)
+        {
+            if (CurrentHealth <= 0)
+            {
+                CurrentHealth = 0;
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine($"{User} has been defeated! Nice job you deafeated your first foe.");
+                Console.ResetColor();
+            }
+
+        }
     }
 
+}
