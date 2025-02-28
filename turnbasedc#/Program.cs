@@ -5,8 +5,7 @@
     {
         static void Main(string[] args)
         {
-
-            Player player = new Player(2, 20, 60, 0, 0, 3, 0, 0, 0, 3, 0, "Water");
+            Player player = new(2, 20, 3, 3, "Water");
             Enemy enemy = new Enemy(2, 20, 50, 0, 0, 3, 0, 0, 0, 3, 0, "Noob");
 
             Random random = new Random();
@@ -39,20 +38,20 @@
                 Console.ForegroundColor = ConsoleColor.Green;
 
                 // Display Player Stats
-                Console.WriteLine($"| Player {player.r} Health: {player.hp}      " +
+                Console.WriteLine($"| Player {player.User} Health: {player.HP}      " +
                     $"   |");
-                Console.WriteLine($"| Defense: {player.d}                      |");
+                Console.WriteLine($"| Defense: {player.Defense}                      |");
 
                 Console.WriteLine("|---------------------------------|");
 
                 // Display Enemy Stats
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"| Enemy {enemy.r} Health: {enemy.hp}           |");
-                Console.WriteLine($"| Defense: {enemy.d}  PThrust({enemy.t}/{enemy.mt})        |");
+                Console.WriteLine($"| Enemy {enemy.User} Health: {enemy.HP}           |");
+                Console.WriteLine($"| Defense: {enemy.Defense}  PThrust({enemy.ThrustUses}/{enemy.MaxThrustUses})        |");
 
                 Console.WriteLine("|=================================|");
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine($"| (A)ttack   (S)tab({player.s}/{player.ms})         " +
+                Console.WriteLine($"| (A)ttack   (S)tab({player.StabUses}/{player.MaxStabUses})         " +
                     $" |");
                 Console.WriteLine($"| (D)efend                        |");
                 Console.WriteLine("|=================================|");
@@ -61,22 +60,22 @@
                 Console.WriteLine("Choose an action: ");
 
 
-                string choice = Console.ReadLine();
+                string? choice = Console.ReadLine();                            // Make choice a nullable type in case the user types an empty value
 
 
                 if (choice == "a")
                 {
-                    player.Attack(enemy, player, enemy);
+                    player.Attack(enemy);
                     Console.ReadKey();
                 }
                 else if (choice == "d")
                 {
-                    if (player.d == 0)
+                    if (player.Defense == 0)
                     {
-                        player.Defense_M(enemy, player);
+                        player.Defend();
                         Console.ReadKey();
                     }
-                    else if (player.d > 0)
+                    else if (player.Defense > 0)
                     {
                         Console.WriteLine("You cant defend again until it is broke by an attack!");
                         Console.ReadKey();
@@ -85,15 +84,15 @@
                 }
                 else if (choice == "s")
                 {
-                    if (player.s < player.ms)
+                    if (player.StabUses < player.MaxStabUses)
                     {
-                        player.Stab(enemy, player);
+                        player.Stab(enemy);
 
                         Console.ReadKey();
                     }
                     else
                     {
-                        player.youcantStab();
+                        player.YoucantStab();
                         continue;
                     }
 
@@ -109,7 +108,7 @@
                 Console.WriteLine("-- Enemy turn --");
 
                 enemy.deathCheck(enemy);
-                player.deathCheck(player);
+                player.DeathCheck();
 
 
 
@@ -130,7 +129,7 @@
                 }
                 else if (EnemyChoice == 6 || EnemyChoice == 7)
 
-                    if (enemy.t < enemy.mt)
+                    if (enemy.ThrustUses < enemy.MaxThrustUses)
                     {
                         enemy.paralyzingThrust(player, enemy);
                         Console.ReadKey();
@@ -153,7 +152,7 @@
                     }
 
                 Console.WriteLine($"{EnemyChoice} is choice");
-                if (enemy.hp <= 0)
+                if (enemy.HP <= 0)
                 {
                     enemy.deathCheck(enemy);
                     Console.WriteLine("To be contiued...");
@@ -163,12 +162,12 @@
                 }
 
 
-                if (player.hp <= 0)
+                if (player.HP <= 0)
                 {
-                    player.deathCheck(player);
+                    player.DeathCheck();
                 }
 
-              
+
 
 
 
