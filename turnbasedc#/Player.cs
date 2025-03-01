@@ -6,8 +6,8 @@
 
         // Added properties here, instead of global variables, since they are more idiomatic to C#
         private int ThrustUses { get; set; } = 0;
-        private int ParaTurns { get; set; } = 0;
-        private int AttackPower { get; set; }                                   // attackPower can be a private property
+        private int ParalyzedTurns { get; set; } = 0;
+        private int AttackPower { get; set; }
         private int MaxThrustUses { get; set; }
 
         private Random random = new();
@@ -18,8 +18,6 @@
         public int MaxStabUses { get; private set; }
         public string User { get; private set; }
         public int HP {get; private set; }
-
-        // ininiliaze fields
 
         // Since only a few values are being initialized from Program.cs
         // those values can be set on the constructor and the rest can be initialized
@@ -39,22 +37,22 @@
 
             // Calculate the random damage
             int randomDamage = rng * AttackPower;
-            int paralyzedChances = random.Next(4);
-            int attackNumbers = random.Next(1, 8);
+            int randomParalyzedChance = random.Next(4);                         // added random to the name of random generated variables
+            int randomAttackNumber = random.Next(1, 8);
             BleedCheck(AttackPower / 2);                                        // Functions should be named with Capital CamelCasing
 
-            if (paralyzedChances == 1 && ParaTurns > 0)
+            if (randomParalyzedChance == 1 && ParalyzedTurns > 0)
             {
                 DisplayParalyzedMessage();
             }
             else
             {
-                if (ParaTurns > 0)
+                if (ParalyzedTurns > 0)
                 {
-                    ParaTurns--;
+                    ParalyzedTurns--;
                 }
 
-                DisplayAtttackMessage(enemy, randomDamage, attackNumbers);      // Functions in C# use capital CamelCasing
+                DisplayAtttackMessage(enemy, randomDamage, randomAttackNumber);      // Functions in C# use capital CamelCasing
                 enemy.TakeDamage(randomDamage);                                 // variables use lower case camelCasing
             }
         }
@@ -63,19 +61,19 @@
         public void Defend()
         {
             int defenseValue = random.Next(1, 8);
-            int paralyzedChances = random.Next(1, 4);
+            int randomParalyzedChance = random.Next(1, 4);
 
             BleedCheck(AttackPower / 2);                                        // BleedCheck is part of Player, it can be called directly
 
-            if (paralyzedChances == 1 && ParaTurns > 0)
+            if (randomParalyzedChance == 1 && ParalyzedTurns > 0)
             {
                 DisplayParalyzedMessage();
             }
             else
             {
-                if (ParaTurns > 0)
+                if (ParalyzedTurns > 0)
                 {
-                    ParaTurns--;
+                    ParalyzedTurns--;
                 }
 
                 if (Defense <= 0)
@@ -84,10 +82,9 @@
                     DisplayDefenseMessage(defenseValue);
                 }
             }
-
         }
 
-        public void TakeDamage(int RandomDamage, Enemy enemy)
+        public void TakeDamage(int RandomDamage)
         {
             HP -= RandomDamage - Defense;
 
@@ -99,27 +96,26 @@
 
         public void Stab(Enemy enemy)
         {
-            int stabValue = random.Next(1, 4);
+            int randomStabValue = random.Next(1, 4);
             int rng = (int)(random.NextDouble() * 0.45 + 0.75);                 // Cast here to avoid casting below
             int StabDamage = (int)(1.15 * AttackPower);
             int randStabDamage = rng * StabDamage;
             int paraChance = random.Next(1, 4);
 
             BleedTurns = 0;
-            if (paraChance == 4 && ParaTurns > 0)                               // & is for binary AND, && is for comparisons AND
+            if (paraChance == 4 && ParalyzedTurns > 0)                               // & is for binary AND, && is for comparisons AND
             {
                 DisplayParalyzedMessage();                                      // Named all functions that output to Console as DisplayXXXMessage for consistency
             }
             else
             {
-                if (ParaTurns > 0)
+                if (ParalyzedTurns > 0)
                 {
-                    ParaTurns--;
+                    ParalyzedTurns--;
                 }
 
-                Console.ForegroundColor = ConsoleColor.Red;
-                DisplayStabMessage(enemy, stabValue, randStabDamage);
-                Console.ResetColor();
+                DisplayStabMessage(enemy, randomStabValue, randStabDamage);
+
             }
         }
 
@@ -173,12 +169,12 @@
 
         public void ApplyParalyze()
         {
-            if (ParaTurns < 1)
+            if (ParalyzedTurns < 1)
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine($"{User} is parylyzed! They may be unable to move");
                 Console.ResetColor();
-                ParaTurns += 7;
+                ParalyzedTurns += 7;
             }
         }
 
@@ -203,7 +199,6 @@
         {
             if (HP <= 0)
             {
-                HP = 0;
                 Console.WriteLine($"{User} has been defeated!");
                 Console.WriteLine("You died!");
                 Console.ReadKey();
@@ -239,8 +234,8 @@
         {
             var defenseMessage = defenseValue switch
             {
-                1 => $"{User} held their weapon in a tactical grip, aimed for maximum control.  ",
-                2 => $"{User} twirled their weapon in a defensive dance. ",
+                1 => $"{User} held their weapon in a tactical grip, aimed for maximum control.",
+                2 => $"{User} twirled their weapon in a defensive dance.",
                 3 => $"{User} stood at the ready, weapon anchored in a defensive position, poised for observation and protection.",
                 4 => $"The light glinted off {User}’s weapon, held protectively as they maintained a vigilant watch over their surroundings.",
                 _ => $"{User} steadied their weapon, maintaining balance and readiness."
@@ -266,8 +261,8 @@
             Console.WriteLine(stabMessage);
             Console.ResetColor();
 
-            enemy.takestab(randStabDamage);
-            enemy.ApplyBleed(AttackPower / 2);
+            enemy.Takestab(randStabDamage);
+            enemy.ApplyBleed();
 
             StabUses++;
         }
