@@ -1,452 +1,284 @@
-﻿using System.Numerics;
-using System.Collections.Generic;
-using System;
-
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ConsoleAppTurnBased
+﻿namespace ConsoleAppTurnBased
 {
     class Player
     {
         //tommrow make list of text for all text in atack and defend
-        private int attackPower;
-        private int CurrentHealth;
-        private int MaxHealth;
-        private int Defense;
-        private int t_Defense;
-        private string User;
 
+        // Added properties here, instead of global variables, since they are more idiomatic to C#
+        private int ThrustUses { get; set; } = 0;
+        private int ParalyzedTurns { get; set; } = 0;
+        private int AttackPower { get; set; }
+        private int MaxThrustUses { get; set; }
 
-        private int stabUses;
-        private int maxstabUses;
-        private int thrustUses;
-        private int maxthrustUses;
-        private int bleedturns;
-        private int paraTurns;
+        private Random random = new();
 
-        Random random = new Random();
+        public int Defense { get; private set; } = 0;                           // This is like having a public getter and a private setter
+        public int StabUses { get; private set; } = 0;
+        private int BleedTurns { get; set; } = 0;
+        public int MaxStabUses { get; private set; }
+        public string User { get; private set; }
+        public int HP {get; private set; }
 
-        public int hp { get { return CurrentHealth; } }
-        public string r { get { return User; } }
-
-        public int d { get { return Defense; } }
-
-        public int s { get { return stabUses; } }
-        public int ms { get { return maxstabUses; } }
-
-        public int a { get { return attackPower; } }
-
-        // ininiliaze fields
-        public Player(int attackPower, int CurrentHealth, int MaxHealth, int Defense, int t_Defense, int maxstabUses, int stabUses, int bleedturns, int thrustUses, int maxthrustUses, int paraTurns, string User)
+        // Since only a few values are being initialized from Program.cs
+        // those values can be set on the constructor and the rest can be initialized
+        // to default values within the class
+        public Player(int attackPower, int currentHealth, int maxstabUses, int maxthrustUses, string user)
         {
-
-
-            this.attackPower = attackPower;
-            this.CurrentHealth = CurrentHealth;
-            this.MaxHealth = MaxHealth;
-            this.Defense = Defense;
-            this.t_Defense = t_Defense;
-            this.User = User;
-
-
-            this.thrustUses = thrustUses;
-            this.maxthrustUses = maxthrustUses;
-
-            this.bleedturns = bleedturns;
-            this.paraTurns = paraTurns;
-
-
-            this.stabUses = stabUses;
-            this.maxstabUses = maxstabUses;
-
+            AttackPower = attackPower;
+            HP = currentHealth;
+            MaxStabUses = maxstabUses;
+            MaxThrustUses = maxthrustUses;
+            User = user;
         }
 
-        public void Attack(Enemy unitthatsgetAttacking, Player player, Enemy enemy)
+        public void Attack(Enemy enemy)                                         // You can reference this Player instance without having to pass it as an argument to this class
         {
-            double rng = random.NextDouble() * 0.45 + 0.75;
+            int rng = (int)(random.NextDouble() * 0.45 + 0.75);                 // Cast here to avoid casting below
 
             // Calculate the random damage
-            int RandomDamage = (int)(rng * attackPower);
-            int paraChance = random.Next(4);
-            int AttackNumbers = random.Next(1, 8);
-            player.bleedCheck(player, attackPower / 2);
+            int randomDamage = rng * AttackPower;
+            int randomParalyzedChance = random.Next(4);                         // added random to the name of random generated variables
+            int randomAttackNumber = random.Next(1, 8);
+            BleedCheck(AttackPower / 2);                                        // Functions should be named with Capital CamelCasing
 
-            if (paraChance == 1 & paraTurns > 0)
+            if (randomParalyzedChance == 1 && ParalyzedTurns > 0)
             {
-                player.paralyzeCheck();
+                DisplayParalyzedMessage();
             }
-
             else
             {
-
-
-                if (paraTurns > 0)
+                if (ParalyzedTurns > 0)
                 {
-
-                    paraTurns--;
+                    ParalyzedTurns--;
                 }
 
-
-                Console.ForegroundColor = ConsoleColor.Green;
-                switch (AttackNumbers)
-                {
-                    case 1:
-                        Console.WriteLine($"{User} attacked and dealt {RandomDamage - unitthatsgetAttacking.d} damage!");
-                        unitthatsgetAttacking.TakeDamage(RandomDamage, player);
-                        break;
-
-                    case 2:
-                        Console.WriteLine($"{User} launched a focused strike and dealt {RandomDamage - unitthatsgetAttacking.d} damage!");
-                        unitthatsgetAttacking.TakeDamage(RandomDamage, player);
-                        break;
-
-                    case 3:
-                        Console.WriteLine($"{User} charged in confidently and dealt {RandomDamage - unitthatsgetAttacking.d} damage!");
-                        unitthatsgetAttacking.TakeDamage(RandomDamage, player);
-                        break;
-
-                    case 4:
-                        Console.WriteLine($"In a bold move, {User} inflicted {RandomDamage - unitthatsgetAttacking.d} damage!");
-                        unitthatsgetAttacking.TakeDamage(RandomDamage, player);
-                        break;
-
-                    case 5:
-                        Console.WriteLine($"With a calculated swing, {User} secured {RandomDamage - unitthatsgetAttacking.d} damage! ");
-                        unitthatsgetAttacking.TakeDamage(RandomDamage, player);
-                        break;
-
-                    case 6:
-                        Console.WriteLine($"{User} focused their energy into a swift strike, inflicting {RandomDamage - unitthatsgetAttacking.d} damage!");
-                        unitthatsgetAttacking.TakeDamage(RandomDamage, player);
-                        break;
-
-                    case 7:
-                        Console.WriteLine($"Executing a swift maneuver, {User} managed to inflict {RandomDamage - unitthatsgetAttacking.d} damage.");
-                        unitthatsgetAttacking.TakeDamage(RandomDamage, player);
-                        break;
-
-
-                    case 8:
-                        Console.WriteLine($"{User} lunged forward confidently, resulting in a solid hit of {RandomDamage - unitthatsgetAttacking.d} damage!");
-                        unitthatsgetAttacking.TakeDamage(RandomDamage, player);
-                        break;
-
-                    default:
-                        Console.WriteLine($"{User} lunged forward confidently, resulting in a solid hit of {RandomDamage - unitthatsgetAttacking.d} damage!");
-                        unitthatsgetAttacking.TakeDamage(RandomDamage, player);
-                        break;
-
-
-
-
-
-
-
-                }
-
-                Console.ResetColor();
+                DisplayAtttackMessage(enemy, randomDamage, randomAttackNumber);      // Functions in C# use capital CamelCasing
+                enemy.TakeDamage(randomDamage);                                 // variables use lower case camelCasing
             }
         }
 
 
-
-        public void Defense_M(Enemy bleedout, Player player)
+        public void Defend()
         {
-            int TextsNumbers = random.Next(1, 8);
-            int paraChance = random.Next(1, 4);
-            player.bleedCheck(player, attackPower / 2);
-            if (paraChance == 1 & paraTurns > 0)
+            int defenseValue = random.Next(1, 8);
+            int randomParalyzedChance = random.Next(1, 4);
+
+            BleedCheck(AttackPower / 2);                                        // BleedCheck is part of Player, it can be called directly
+
+            if (randomParalyzedChance == 1 && ParalyzedTurns > 0)
             {
-                player.paralyzeCheck();
+                DisplayParalyzedMessage();
             }
             else
             {
-
-                if (paraTurns > 0)
+                if (ParalyzedTurns > 0)
                 {
-
-                    paraTurns--;
+                    ParalyzedTurns--;
                 }
 
                 if (Defense <= 0)
                 {
-                    Defense ++;
-                    Console.ForegroundColor = ConsoleColor.DarkBlue;
-
-                    switch (TextsNumbers)
-                    {
-                        case 1:
-                            Console.WriteLine($"{User} held their weapon in a tactical grip, aimed for maximum control.  ");
-                            break;
-
-                        case 2:
-                            Console.WriteLine($"{User} twirled their weapon in a defensive dance. ");
-                            break;
-
-                        case 3:
-                            Console.WriteLine($"{User} stood at the ready, weapon anchored in a defensive position, poised for observation and protection.");
-                            break;
-
-                        case 4:
-                            Console.WriteLine($"The light glinted off {User}’s weapon, held protectively as they maintained a vigilant watch over their surroundings.");
-
-                            break;
-
-                        default:
-                            Console.WriteLine($"{User} steadied their weapon, maintaining balance and readiness.");
-                            break;
-                    }
-
-                    Console.ResetColor();
+                    Defense++;
+                    DisplayDefenseMessage(defenseValue);
                 }
-
-
-
             }
-
         }
 
-
-
-
-
-
-        public void TakeDamage(int RandomDamage, Enemy enemy)
+        public void TakeDamage(int RandomDamage)
         {
-
-            CurrentHealth -= RandomDamage - Defense;
+            HP -= RandomDamage - Defense;
 
             if (Defense > 0)
             {
-                t_Defense = 0;
                 Defense = 0;
             }
-
-
-
         }
-        public void Stab(Enemy stabnbleedenemy, Player player)
+
+        public void Stab(Enemy enemy)
         {
-
-            int stabtext = random.Next(1, 4);
-
-
-            double rng = random.NextDouble() * 0.45 + 0.75;
-            int StabDamage = (int)(1.15 * (int)attackPower);
-            int randStabDamage = (int)(rng * StabDamage);
+            int randomStabValue = random.Next(1, 4);
+            int rng = (int)(random.NextDouble() * 0.45 + 0.75);                 // Cast here to avoid casting below
+            int StabDamage = (int)(1.15 * AttackPower);
+            int randStabDamage = rng * StabDamage;
             int paraChance = random.Next(1, 4);
 
-            bleedturns = 0;
-            if (paraChance == 4 & paraTurns > 0)
+            BleedTurns = 0;
+            if (paraChance == 4 && ParalyzedTurns > 0)                               // & is for binary AND, && is for comparisons AND
             {
-                player.paralyzeCheck();
+                DisplayParalyzedMessage();                                      // Named all functions that output to Console as DisplayXXXMessage for consistency
             }
             else
             {
-
-
-
-                if (paraTurns > 0)
+                if (ParalyzedTurns > 0)
                 {
-
-                    paraTurns--;
-                }
-                Console.ForegroundColor = ConsoleColor.Red;
-                switch (stabtext)
-                {
-                    case 1:
-                        Console.WriteLine($"{User} rushed their enemy and stabbed doing {randStabDamage - Defense}!");
-                        stabnbleedenemy.takestab(randStabDamage);
-                        stabnbleedenemy.ApplyBleed(attackPower / 2);
-
-                        stabUses++;
-                        break;
-
-                    case 2:
-                        Console.WriteLine($"{User} darted at their foe and thrust their weapon, dealing {randStabDamage - Defense} damage!");
-                        stabnbleedenemy.takestab(randStabDamage);
-                        stabnbleedenemy.ApplyBleed(attackPower / 2);
-                        stabUses++;
-                        break;
-
-                    case 3:
-                        Console.WriteLine($"{User} lunged at the opponent and stabbed, inflicting {randStabDamage - Defense} damage!");
-                        stabnbleedenemy.takestab(randStabDamage);
-                        stabnbleedenemy.ApplyBleed(attackPower / 2);
-                        stabUses++;
-                        break;
-
-                    case 4:
-                        Console.WriteLine($"{User} leaped into action and executed a stab, causing {randStabDamage - Defense} damage!");
-                        stabnbleedenemy.takestab(randStabDamage);
-                        stabnbleedenemy.ApplyBleed(attackPower / 2);
-                        stabUses++;
-                        break;
-
-
-
-
-                    default:
-                        Console.WriteLine($"{User} rushed their enemy and stabbed doing {randStabDamage - Defense}!");
-                        stabnbleedenemy.takestab(randStabDamage);
-                        stabnbleedenemy.ApplyBleed(attackPower / 2);
-                        stabUses++;
-                        break;
+                    ParalyzedTurns--;
                 }
 
+                DisplayStabMessage(enemy, randomStabValue, randStabDamage);
 
             }
-            Console.ResetColor();
         }
 
-        public void takestab(int randStabDamage, Enemy enemy)
+        public void Takestab(int randStabDamage)
         {
-
-
-            CurrentHealth -= randStabDamage - Defense;
+            HP -= randStabDamage - Defense;
             if (Defense > 0)
             {
-                t_Defense = 0;
                 Defense = 0;
             }
-
-
-
         }
 
-
-        public void youcantStab()
+        public void YoucantStab()
         {
-            if (stabUses >= maxstabUses)
+            if (StabUses >= MaxStabUses)
             {
                 Console.WriteLine("You cant use stab anymore.");
             }
         }
 
-
-
-
-        public void ApplyBleed(int bleeddamage)
+        public void ApplyBleed()
         {
-            if (bleedturns <= 0)
+            if (BleedTurns <= 0)
             {
-                bleedturns += 3;
-
-            }
-
-
-
-
-
-
-
-
-        }
-
-        public void bleedCheck(Player bleedout, int bleeddamage)
-        {
-
-            if (bleedturns > 0)
-            {
-                CurrentHealth -= bleeddamage;
-                bleedturns--;
-                Console.WriteLine($"{User} took {bleeddamage} damage from bleeding.");
-
-            }
-            else if (bleedturns == 0)
-            {
-                bleedturns = 0;
-
-
-
-            }
-
-        }
-
-        public void paralyzingThrust(Player paraThrust)
-        {
-
-            int randThrustText = random.Next(1, 4);
-            double rng = random.NextDouble() * 0.45 + 0.75;
-            int ThrustDamage = (int)(1.20 * (int)attackPower);
-            int randThrustDamage = (int)(rng * ThrustDamage);
-
-            if (thrustUses < maxthrustUses)
-            {
-                switch (randThrustText)
-                {
-                    case 1:
-                        Console.WriteLine($"Like lightning, {User} dashed to their opponent and thrust their in there weakpoint doing {randThrustDamage - paraThrust.d}. ");
-                        paraThrust.takeThrust(randThrustDamage);
-                        paraThrust.applyParalyze();
-                        thrustUses++;
-
-                        break;
-
-                    default:
-                        {
-                            Console.WriteLine($"Like lightning, {User} dashed to their opponent and thrust their in there weakpoint doing {randThrustDamage - paraThrust.d} ");
-                            paraThrust.takeThrust(randThrustDamage);
-                            paraThrust.applyParalyze();
-                        }
-                        thrustUses++;
-
-                        break;
-
-                }
-
+                BleedTurns += 3;
             }
         }
 
-        public void applyParalyze()
+        public void BleedCheck(int bleedDamage)
         {
-            if (paraTurns < 1)
+            if (BleedTurns > 0)
+            {
+                HP -= bleedDamage;
+                BleedTurns--;
+                Console.WriteLine($"{User} took {bleedDamage} damage from bleeding.");
+            }
+        }
+
+        public void ParalyzingThrust()                                          // This method is not being called
+        {
+            int randThrustValue = random.Next(1, 4);
+            int rng = (int)(random.NextDouble() * 0.45 + 0.75);
+            int ThrustDamage = (int)(1.20 * AttackPower);
+            int randThrustDamage = rng * ThrustDamage;
+
+            if (ThrustUses < MaxThrustUses)
+            {
+                DisplayThrustMessage(randThrustValue, randThrustDamage);
+            }
+        }
+
+        public void ApplyParalyze()
+        {
+            if (ParalyzedTurns < 1)
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine($"{User} is parylyzed! They may be unable to move");
                 Console.ResetColor();
-                paraTurns += 7;
-
+                ParalyzedTurns += 7;
             }
-
         }
 
-        public void paralyzeCheck()
+        public void DisplayParalyzedMessage()
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine($"{User} is parylyzed!");
             Console.WriteLine("They cant move!");
             Console.ResetColor();
-
         }
-        public void takeThrust(int randThrustDamage)
+
+        public void TakeThrust(int randThrustDamage)
         {
-            CurrentHealth -= randThrustDamage - Defense;
+            HP -= randThrustDamage - Defense;
             if (Defense > 0)
             {
-                t_Defense = 0;
                 Defense = 0;
             }
         }
-        public void deathCheck(Player player)
+
+        public void DeathCheck()
         {
-            if (CurrentHealth <= 0)
+            if (HP <= 0)
             {
-                CurrentHealth = 0;
                 Console.WriteLine($"{User} has been defeated!");
                 Console.WriteLine("You died!");
                 Console.ReadKey();
                 Environment.Exit(0);
-
             }
+        }
+        // Moved private functions to the bottom and public to the top
+        private void DisplayAtttackMessage(Enemy enemy, int randomDamage, int attackNumbers)
+        {
+            // This is called a switch expression
+            // it's similar to a switch case but the difference it that
+            // it returns a value for each case
+            var attackMessage = attackNumbers switch
+            {
+                1 => $"{User} attacked and dealt {randomDamage - enemy.Defense} damage!",
+                2 => $"{User} launched a focused strike and dealt {randomDamage - enemy.Defense} damage!",
+                3 => $"{User} charged in confidently and dealt {randomDamage - enemy.Defense} damage!",
+                4 => $"In a bold move, {User} inflicted {randomDamage - enemy.Defense} damage!",
+                5 => $"With a calculated swing, {User} secured {randomDamage - enemy.Defense} damage! ",
+                6 => $"{User} focused their energy into a swift strike, inflicting {randomDamage - enemy.Defense} damage!",
+                7 => $"Executing a swift maneuver, {User} managed to inflict {randomDamage - enemy.Defense} damage.",
+                8 => $"{User} lunged forward confidently, resulting in a solid hit of {randomDamage - enemy.Defense} damage!",
+                _ => $"{User} lunged forward confidently, resulting in a solid hit of {randomDamage - enemy.Defense} damage!"
+            };
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(attackMessage);
+            Console.ResetColor();
+
+        }
+
+        private void DisplayDefenseMessage(int defenseValue)
+        {
+            var defenseMessage = defenseValue switch
+            {
+                1 => $"{User} held their weapon in a tactical grip, aimed for maximum control.",
+                2 => $"{User} twirled their weapon in a defensive dance.",
+                3 => $"{User} stood at the ready, weapon anchored in a defensive position, poised for observation and protection.",
+                4 => $"The light glinted off {User}’s weapon, held protectively as they maintained a vigilant watch over their surroundings.",
+                _ => $"{User} steadied their weapon, maintaining balance and readiness."
+            };
+
+            Console.ForegroundColor = ConsoleColor.DarkBlue;
+            Console.WriteLine(defenseMessage);
+            Console.ResetColor();
+        }
+
+        private void DisplayStabMessage(Enemy enemy, int stabValue, int randStabDamage)
+        {
+            var stabMessage = stabValue switch
+            {
+                1 => $"{User} rushed their enemy and stabbed doing {randStabDamage - Defense}!",
+                2 => $"{User} darted at their foe and thrust their weapon, dealing {randStabDamage - Defense} damage!",
+                3 => $"{User} lunged at the opponent and stabbed, inflicting {randStabDamage - Defense} damage!",
+                4 => $"{User} leaped into action and executed a stab, causing {randStabDamage - Defense} damage!",
+                _ => $"{User} rushed their enemy and stabbed doing {randStabDamage - Defense}!"
+            };
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(stabMessage);
+            Console.ResetColor();
+
+            enemy.Takestab(randStabDamage);
+            enemy.ApplyBleed();
+
+            StabUses++;
+        }
+
+        private void DisplayThrustMessage(int randThrustValue, int randThrustDamage)
+        {
+            var thrustMessage = randThrustValue switch
+            {
+                1 => $"Like lightning, {User} dashed to their opponent and thrust their in there weakpoint doing {randThrustDamage - Defense}. ",
+                _ => $"Like lightning, {User} dashed to their opponent and thrust their in there weakpoint doing {randThrustDamage - Defense} "
+            };
+
+            Console.WriteLine(thrustMessage);
+            TakeThrust(randThrustDamage);
+            ApplyParalyze();
+            ThrustUses++;
         }
     }
 }
-
-
-        
-
-
-
